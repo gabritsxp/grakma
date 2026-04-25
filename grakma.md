@@ -65,7 +65,7 @@ The app uses localized routes:
 - `/en/reports`
 - `/en/settings`
 
-`src/app/page.tsx` redirects to `/pt-BR`.
+`src/app/page.tsx` renders a static link to `/pt-BR` for GitHub Pages compatibility.
 
 Locale pages use this pattern:
 
@@ -128,12 +128,35 @@ Shared calculations live in:
 npm run dev
 npm run lint
 npm run build
+npm run build:pages
 ```
 
 Default local URL:
 
 ```txt
 http://localhost:3000/pt-BR
+```
+
+## Static hosting
+
+The project is configured for static export:
+
+- `next.config.ts` uses `output: 'export'`.
+- Locale routes are generated with `generateStaticParams`.
+- The root page uses a static relative link to `/pt-BR`.
+- `.github/workflows/pages.yml` can publish `out/` to GitHub Pages.
+- `public/.nojekyll` keeps GitHub Pages from ignoring `_next` assets.
+
+For project pages, set `NEXT_PUBLIC_BASE_PATH` to the repository path:
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/grakma npm run build
+```
+
+For a user site like `username.github.io`, no base path is needed:
+
+```bash
+npm run build
 ```
 
 ## Next steps
