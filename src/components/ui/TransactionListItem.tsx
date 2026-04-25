@@ -5,6 +5,7 @@ type TransactionListItemProps = {
   subtitle: string;
   amount: string;
   type: 'income' | 'expense' | 'benefit';
+  onClick?: () => void;
 };
 
 export function TransactionListItem({
@@ -12,12 +13,17 @@ export function TransactionListItem({
   subtitle,
   amount,
   type,
+  onClick,
 }: TransactionListItemProps) {
   const isPositive = type === 'income' || type === 'benefit';
   const Icon = isPositive ? ArrowDownLeft : ArrowUpRight;
 
   return (
-    <div className="flex items-center justify-between rounded-3xl border border-zinc-800 bg-zinc-950 p-4">
+    <button
+      type="button"
+      className="flex w-full items-center justify-between gap-3 rounded-3xl border border-zinc-800 bg-zinc-950 p-4 text-left transition hover:border-zinc-700"
+      onClick={onClick}
+    >
       <div className="flex min-w-0 items-center gap-3">
         <div
           className={
@@ -47,6 +53,6 @@ export function TransactionListItem({
       >
         {amount}
       </span>
-    </div>
+    </button>
   );
 }

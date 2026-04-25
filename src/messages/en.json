@@ -49,7 +49,12 @@
         "income": "Income",
         "expenses": "Expenses",
         "allTransactions": "All transactions",
-        "empty": "No transactions found."
+        "empty": "No transactions found.",
+        "edit": "Edit transaction",
+        "update": "Update",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "deleteConfirmation": "Are you sure?"
     },
     "reports": {
         "eyebrow": "Analysis",

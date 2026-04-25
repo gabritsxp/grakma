@@ -49,7 +49,12 @@
         "income": "Receitas",
         "expenses": "Despesas",
         "allTransactions": "Todas as transações",
-        "empty": "Nenhuma transação encontrada."
+        "empty": "Nenhuma transação encontrada.",
+        "edit": "Editar transação",
+        "update": "Atualizar",
+        "delete": "Deletar",
+        "cancel": "Cancelar",
+        "deleteConfirmation": "Tem certeza?"
     },
     "reports": {
         "eyebrow": "Análise",
