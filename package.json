@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
+    "@swc/helpers": "^0.5.21",
     "@tanstack/react-form": "^1.29.1",
     "clsx": "^2.1.1",
     "dexie": "^4.4.2",
