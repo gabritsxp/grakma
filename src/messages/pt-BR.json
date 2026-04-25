@@ -1,0 +1,94 @@
+{
+    "navigation": {
+        "home": "Início",
+        "transactions": "Transações",
+        "add": "Adicionar",
+        "reports": "Relatórios",
+        "settings": "Ajustes"
+    },
+    "home": {
+        "welcomeBack": "Bem-vindo de volta",
+        "availableBalance": "Saldo disponível",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "benefit": "Benefício",
+        "available": "Disponível",
+        "addTransaction": "Adicionar transação",
+        "recentTransactions": "Transações recentes",
+        "seeAll": "Ver todas",
+        "empty": "Nenhuma transação cadastrada ainda."
+    },
+    "add": {
+        "eyebrow": "Novo lançamento",
+        "title": "Adicionar transação",
+        "transactionType": "Tipo de lançamento",
+        "income": "Receita",
+        "incomeDescription": "Salário, renda extra ou recebimentos",
+        "expense": "Despesa",
+        "expenseDescription": "Contas, compras ou gastos do dia a dia",
+        "benefit": "Benefício",
+        "benefitDescription": "Vale refeição, transporte ou benefícios",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Ex: Salário mensal",
+        "amount": "Valor",
+        "amountPlaceholder": "0,00",
+        "date": "Data",
+        "category": "Categoria",
+        "categoryPlaceholder": "Ex: Salário, Mercado, Aluguel",
+        "account": "Conta",
+        "accountPlaceholder": "Ex: Conta principal",
+        "save": "Salvar transação"
+    },
+    "transactionsPage": {
+        "eyebrow": "Histórico",
+        "title": "Transações",
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar transação",
+        "filter": "Filtrar transações",
+        "selectMonth": "Selecionar mês",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "allTransactions": "Todas as transações",
+        "empty": "Nenhuma transação encontrada."
+    },
+    "reports": {
+        "eyebrow": "Análise",
+        "title": "Relatórios",
+        "monthlyOverview": "Visão mensal",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "balance": "Saldo",
+        "benefit": "Benefício",
+        "byCategory": "Por categoria",
+        "food": "Alimentação",
+        "bills": "Contas",
+        "transport": "Transporte",
+        "shopping": "Compras",
+        "monthlyCashFlow": "Fluxo do mês",
+        "availableAfterExpenses": "Disponível após despesas",
+        "highestExpense": "Maior despesa",
+        "mostUsedCategory": "Categoria mais usada",
+        "empty": "Cadastre despesas para ver a divisão por categoria."
+    },
+    "settings": {
+        "eyebrow": "Preferências",
+        "title": "Ajustes",
+        "preferences": "Preferências do app",
+        "preferencesDescription": "Configure como você quer usar o Grakma.",
+        "language": "Idioma",
+        "languageDescription": "Escolha o idioma da interface.",
+        "data": "Dados",
+        "dataDescription": "Gerencie importação, exportação e backups.",
+        "appearance": "Aparência",
+        "appearanceDescription": "O Grakma está usando modo escuro por padrão."
+    },
+    "common": {
+        "hideBalance": "Ocultar saldo",
+        "showBalance": "Mostrar saldo"
+    },
+    "language": {
+        "label": "Idioma",
+        "ptBR": "Português",
+        "en": "Inglês"
+    }
+}

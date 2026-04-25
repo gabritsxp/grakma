@@ -1,0 +1,94 @@
+{
+    "navigation": {
+        "home": "Home",
+        "transactions": "Transactions",
+        "add": "Add",
+        "reports": "Reports",
+        "settings": "Settings"
+    },
+    "home": {
+        "welcomeBack": "Welcome back",
+        "availableBalance": "Available balance",
+        "income": "Income",
+        "expenses": "Expenses",
+        "benefit": "Benefit",
+        "available": "Available",
+        "addTransaction": "Add transaction",
+        "recentTransactions": "Recent transactions",
+        "seeAll": "See all",
+        "empty": "No transactions registered yet."
+    },
+    "add": {
+        "eyebrow": "New record",
+        "title": "Add transaction",
+        "transactionType": "Transaction type",
+        "income": "Income",
+        "incomeDescription": "Salary, extra income or received money",
+        "expense": "Expense",
+        "expenseDescription": "Bills, purchases or daily spending",
+        "benefit": "Benefit",
+        "benefitDescription": "Meal voucher, transport or company benefits",
+        "description": "Description",
+        "descriptionPlaceholder": "Ex: Monthly salary",
+        "amount": "Amount",
+        "amountPlaceholder": "0.00",
+        "date": "Date",
+        "category": "Category",
+        "categoryPlaceholder": "Ex: Salary, Grocery, Rent",
+        "account": "Account",
+        "accountPlaceholder": "Ex: Main account",
+        "save": "Save transaction"
+    },
+    "transactionsPage": {
+        "eyebrow": "History",
+        "title": "Transactions",
+        "search": "Search",
+        "searchPlaceholder": "Search transaction",
+        "filter": "Filter transactions",
+        "selectMonth": "Select month",
+        "income": "Income",
+        "expenses": "Expenses",
+        "allTransactions": "All transactions",
+        "empty": "No transactions found."
+    },
+    "reports": {
+        "eyebrow": "Analysis",
+        "title": "Reports",
+        "monthlyOverview": "Monthly overview",
+        "income": "Income",
+        "expenses": "Expenses",
+        "balance": "Balance",
+        "benefit": "Benefit",
+        "byCategory": "By category",
+        "food": "Food",
+        "bills": "Bills",
+        "transport": "Transport",
+        "shopping": "Shopping",
+        "monthlyCashFlow": "Monthly cash flow",
+        "availableAfterExpenses": "Available after expenses",
+        "highestExpense": "Highest expense",
+        "mostUsedCategory": "Most used category",
+        "empty": "Add expenses to see the category breakdown."
+    },
+    "settings": {
+        "eyebrow": "Preferences",
+        "title": "Settings",
+        "preferences": "App preferences",
+        "preferencesDescription": "Configure how you want to use Grakma.",
+        "language": "Language",
+        "languageDescription": "Choose the interface language.",
+        "data": "Data",
+        "dataDescription": "Manage import, export and backups.",
+        "appearance": "Appearance",
+        "appearanceDescription": "Grakma is using dark mode by default."
+    },
+    "common": {
+        "hideBalance": "Hide balance",
+        "showBalance": "Show balance"
+    },
+    "language": {
+        "label": "Language",
+        "ptBR": "Portuguese",
+        "en": "English"
+    }
+}
