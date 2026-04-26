@@ -5,12 +5,28 @@ export type TransactionSummary = {
   expenses: number;
   benefit: number;
   balance: number;
+  confirmedIncome: number;
+  confirmedExpenses: number;
+  confirmedBenefit: number;
+  confirmedBalance: number;
+  pendingIncome: number;
+  pendingExpenses: number;
+  pendingBenefit: number;
 };
 
 export type CategorySummary = {
   category: string;
   total: number;
   percent: number;
+};
+
+export type AccountForecast = {
+  accountId: string;
+  account: string;
+  income: number;
+  expenses: number;
+  balance: number;
+  confirmedBalance: number;
 };
 
 export function formatCurrency(value: number, locale: string) {
@@ -58,16 +74,37 @@ export function summarizeTransactions(
       if (transaction.type === 'income') {
         summary.income += transaction.amount;
         summary.balance += transaction.amount;
+
+        if (transaction.status === 'confirmed') {
+          summary.confirmedIncome += transaction.amount;
+          summary.confirmedBalance += transaction.amount;
+        } else {
+          summary.pendingIncome += transaction.amount;
+        }
       }
 
       if (transaction.type === 'expense') {
         summary.expenses += transaction.amount;
         summary.balance -= transaction.amount;
+
+        if (transaction.status === 'confirmed') {
+          summary.confirmedExpenses += transaction.amount;
+          summary.confirmedBalance -= transaction.amount;
+        } else {
+          summary.pendingExpenses += transaction.amount;
+        }
       }
 
       if (transaction.type === 'benefit') {
         summary.benefit += transaction.amount;
         summary.balance += transaction.amount;
+
+        if (transaction.status === 'confirmed') {
+          summary.confirmedBenefit += transaction.amount;
+          summary.confirmedBalance += transaction.amount;
+        } else {
+          summary.pendingBenefit += transaction.amount;
+        }
       }
 
       return summary;
@@ -77,27 +114,124 @@ export function summarizeTransactions(
       expenses: 0,
       benefit: 0,
       balance: 0,
+      confirmedIncome: 0,
+      confirmedExpenses: 0,
+      confirmedBenefit: 0,
+      confirmedBalance: 0,
+      pendingIncome: 0,
+      pendingExpenses: 0,
+      pendingBenefit: 0,
     }
   );
 }
 
-export function getCurrentMonthTransactions(transactions: Transaction[]) {
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
-
+export function getMonthTransactions(transactions: Transaction[], monthDate: Date) {
+  const month = monthDate.getMonth();
+  const year = monthDate.getFullYear();
+ 
   return transactions.filter((transaction) => {
-    const date = new Date(`${transaction.date}T00:00:00`);
+    const date = new Date(`${transaction.dueDate}T00:00:00`);
 
     return date.getMonth() === month && date.getFullYear() === year;
   });
 }
 
-export function getCurrentMonthLabel(locale: string) {
+export function getCurrentMonthTransactions(transactions: Transaction[]) {
+  return getMonthTransactions(transactions, new Date());
+}
+
+export function getMonthLabel(locale: string, monthDate: Date) {
   return new Intl.DateTimeFormat(locale, {
     month: 'long',
     year: 'numeric',
-  }).format(new Date());
+  }).format(monthDate);
+}
+
+export function getCurrentMonthLabel(locale: string) {
+  return getMonthLabel(locale, new Date());
+}
+
+export function addCalendarMonths(date: Date, months: number) {
+  const nextDate = new Date(date);
+
+  nextDate.setMonth(nextDate.getMonth() + months);
+
+  return nextDate;
+}
+
+export function getTransactionsUntilMonth(
+  transactions: Transaction[],
+  monthDate: Date
+) {
+  const endOfMonth = new Date(
+    monthDate.getFullYear(),
+    monthDate.getMonth() + 1,
+    0
+  )
+    .toISOString()
+    .slice(0, 10);
+
+  return transactions.filter((transaction) => transaction.dueDate <= endOfMonth);
+}
+
+export function summarizeAccounts(transactions: Transaction[]): AccountForecast[] {
+  const accounts = new Map<string, AccountForecast>();
+
+  function getAccount(accountId: string, account: string) {
+    const key = accountId || account;
+    const current = accounts.get(key);
+
+    if (current) {
+      return current;
+    }
+
+    const nextAccount = {
+      accountId,
+      account,
+      income: 0,
+      expenses: 0,
+      balance: 0,
+      confirmedBalance: 0,
+    };
+
+    accounts.set(key, nextAccount);
+
+    return nextAccount;
+  }
+
+  for (const transaction of transactions) {
+    if (transaction.type === 'income') {
+      const account = getAccount(
+        transaction.accountId ?? '',
+        transaction.account
+      );
+
+      account.income += transaction.amount;
+      account.balance += transaction.amount;
+
+      if (transaction.status === 'confirmed') {
+        account.confirmedBalance += transaction.amount;
+      }
+    }
+
+    if (transaction.type === 'expense') {
+      const account = getAccount(
+        transaction.fundingAccountId ?? transaction.accountId ?? '',
+        transaction.fundingAccount ?? transaction.account
+      );
+
+      account.expenses += transaction.amount;
+      account.balance -= transaction.amount;
+
+      if (transaction.status === 'confirmed') {
+        account.confirmedBalance -= transaction.amount;
+      }
+    }
+  }
+
+  return Array.from(accounts.values()).sort((a, b) =>
+    a.account.localeCompare(b.account)
+  );
 }
 
 export function summarizeExpenseCategories(

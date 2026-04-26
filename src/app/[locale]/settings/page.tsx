@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { SectionCard } from '@/components/ui/SectionCard';
+import { FinanceSetup } from '@/features/settings/components/FinanceSetup';
 import { SettingsItem } from '@/features/settings/components/SettingsItem';
 
 export default async function SettingsPage({
@@ -52,6 +53,8 @@ function SettingsContent() {
           description={t('dataDescription')}
         />
       </SectionCard>
+
+      <FinanceSetup />
     </div>
   );
 }

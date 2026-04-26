@@ -53,6 +53,18 @@ export function ReportsMonthlyOverview() {
           value={formatCurrency(summary.benefit, locale)}
           icon={CreditCard}
         />
+
+        <StatCard
+          label={t('confirmed')}
+          value={formatCurrency(summary.confirmedBalance, locale)}
+          icon={PiggyBank}
+        />
+
+        <StatCard
+          label={t('pending')}
+          value={formatCurrency(summary.balance - summary.confirmedBalance, locale)}
+          icon={CreditCard}
+        />
       </div>
     </SectionCard>
   );

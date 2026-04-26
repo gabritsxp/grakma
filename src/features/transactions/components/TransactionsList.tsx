@@ -6,11 +6,17 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { TransactionListItem } from '@/components/ui/TransactionListItem';
 import type { Transaction, TransactionType } from '@/lib/db/database';
-import { deleteTransaction, updateTransaction } from '@/lib/db/transactions';
+import {
+  deleteRecurringTransactionsFrom,
+  deleteTransaction,
+  updateRecurringTransactionsFrom,
+  updateTransaction,
+} from '@/lib/db/transactions';
 import { useTransactions } from '@/lib/db/useTransactions';
 import {
   formatTransactionAmount,
   formatTransactionDate,
+  getMonthTransactions,
   parseCurrencyInput,
 } from '@/lib/transactions/summary';
 
@@ -21,6 +27,7 @@ type EditState = {
   date: string;
   category: string;
   account: string;
+  status: 'pending' | 'confirmed';
 };
 
 function createEditState(transaction: Transaction): EditState {
@@ -28,34 +35,50 @@ function createEditState(transaction: Transaction): EditState {
     type: transaction.type,
     description: transaction.description,
     amount: String(transaction.amount).replace('.', ','),
-    date: transaction.date,
+    date: transaction.dueDate,
     category: transaction.category,
     account: transaction.account,
+    status: transaction.status,
   };
 }
 
-export function TransactionsList() {
+type TransactionsListProps = {
+  monthDate?: Date;
+};
+
+export function TransactionsList({ monthDate }: TransactionsListProps) {
   const locale = useLocale();
   const page = useTranslations('transactionsPage');
   const add = useTranslations('add');
   const { transactions, reloadTransactions } = useTransactions();
+  const visibleTransactions = monthDate
+    ? getMonthTransactions(transactions, monthDate)
+    : transactions;
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [editState, setEditState] = useState<EditState | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(
     null
   );
+  const [isChoosingRecurringDelete, setIsChoosingRecurringDelete] =
+    useState(false);
+  const [isChoosingRecurringUpdate, setIsChoosingRecurringUpdate] =
+    useState(false);
 
   function openTransaction(transaction: Transaction) {
     setSelectedTransaction(transaction);
     setEditState(createEditState(transaction));
     setDeleteConfirmationId(null);
+    setIsChoosingRecurringDelete(false);
+    setIsChoosingRecurringUpdate(false);
   }
 
   function closeTransaction() {
     setSelectedTransaction(null);
     setEditState(null);
     setDeleteConfirmationId(null);
+    setIsChoosingRecurringDelete(false);
+    setIsChoosingRecurringUpdate(false);
   }
 
   function updateEditState<Key extends keyof EditState>(
@@ -72,9 +95,9 @@ export function TransactionsList() {
     );
   }
 
-  async function handleUpdate(id: string) {
+  function getUpdateInput() {
     if (!editState) {
-      return;
+      return null;
     }
 
     const amount = parseCurrencyInput(editState.amount);
@@ -85,29 +108,102 @@ export function TransactionsList() {
       !editState.account.trim() ||
       amount <= 0
     ) {
-      return;
+      return null;
     }
 
-    await updateTransaction(id, {
+    return {
       type: editState.type,
       description: editState.description,
       amount,
-      date: editState.date,
+      dueDate: editState.date,
+      status: editState.status,
       category: editState.category,
       account: editState.account,
-    });
+    };
+  }
+
+  async function handleUpdate(id: string) {
+    if (selectedTransaction?.recurrenceId && !isChoosingRecurringUpdate) {
+      setIsChoosingRecurringUpdate(true);
+      return;
+    }
+
+    await handleUpdateCurrentMonth(id);
+  }
+
+  async function handleUpdateCurrentMonth(id: string) {
+    const updateInput = getUpdateInput();
+
+    if (!updateInput) {
+      return;
+    }
+
+    await updateTransaction(id, updateInput);
+
+    closeTransaction();
+    await reloadTransactions();
+  }
+
+  async function handleUpdateCurrentAndNext(transaction: Transaction) {
+    const updateInput = getUpdateInput();
+
+    if (!updateInput || !transaction.recurrenceId) {
+      return;
+    }
+
+    await updateRecurringTransactionsFrom(
+      transaction.recurrenceId,
+      transaction.dueDate,
+      updateInput
+    );
 
     closeTransaction();
     await reloadTransactions();
   }
 
   async function handleDelete(id: string) {
+    if (selectedTransaction?.recurrenceId && !isChoosingRecurringDelete) {
+      setIsChoosingRecurringDelete(true);
+      return;
+    }
+
     if (deleteConfirmationId !== id) {
       setDeleteConfirmationId(id);
       return;
     }
 
     await deleteTransaction(id);
+
+    closeTransaction();
+    await reloadTransactions();
+  }
+
+  async function handleDeleteCurrentMonth(id: string) {
+    if (deleteConfirmationId !== id) {
+      setDeleteConfirmationId(id);
+      return;
+    }
+
+    await deleteTransaction(id);
+
+    closeTransaction();
+    await reloadTransactions();
+  }
+
+  async function handleDeleteCurrentAndNext(transaction: Transaction) {
+    if (deleteConfirmationId !== transaction.id) {
+      setDeleteConfirmationId(transaction.id);
+      return;
+    }
+
+    if (!transaction.recurrenceId) {
+      return;
+    }
+
+    await deleteRecurringTransactionsFrom(
+      transaction.recurrenceId,
+      transaction.dueDate
+    );
 
     closeTransaction();
     await reloadTransactions();
@@ -120,15 +216,15 @@ export function TransactionsList() {
       </h2>
 
       <div className="space-y-3">
-        {transactions.length > 0 ? (
-          transactions.map((transaction) => (
+        {visibleTransactions.length > 0 ? (
+          visibleTransactions.map((transaction) => (
             <TransactionListItem
               key={transaction.id}
               title={transaction.description}
               subtitle={`${transaction.category} • ${formatTransactionDate(
-                transaction.date,
+                transaction.dueDate,
                 locale
-              )}`}
+              )} • ${page(transaction.status)}`}
               amount={formatTransactionAmount(
                 transaction.amount,
                 transaction.type,
@@ -181,6 +277,23 @@ export function TransactionsList() {
                     onClick={() => updateEditState('type', type)}
                   >
                     {add(type)}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {(['pending', 'confirmed'] as const).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    className={
+                      editState.status === status
+                        ? 'rounded-2xl border border-white bg-white px-3 py-2 text-xs font-semibold text-black'
+                        : 'rounded-2xl border border-zinc-800 bg-black px-3 py-2 text-xs font-semibold text-zinc-400'
+                    }
+                    onClick={() => updateEditState('status', status)}
+                  >
+                    {add(status)}
                   </button>
                 ))}
               </div>
@@ -257,27 +370,101 @@ export function TransactionsList() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-2">
-                <Button
-                  type="button"
-                  className="px-3 text-sm"
-                  onClick={() => handleUpdate(selectedTransaction.id)}
-                >
-                  <Pencil size={16} />
-                  {page('update')}
-                </Button>
+                {!isChoosingRecurringUpdate && (
+                  <Button
+                    type="button"
+                    className="px-3 text-sm"
+                    onClick={() => handleUpdate(selectedTransaction.id)}
+                  >
+                    <Pencil size={16} />
+                    {page('update')}
+                  </Button>
+                )}
 
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="px-3 text-sm"
-                  onClick={() => handleDelete(selectedTransaction.id)}
-                >
-                  <Trash2 size={16} />
-                  {deleteConfirmationId === selectedTransaction.id
-                    ? page('deleteConfirmation')
-                    : page('delete')}
-                </Button>
+                {!isChoosingRecurringDelete && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="px-3 text-sm"
+                    onClick={() => handleDelete(selectedTransaction.id)}
+                  >
+                    <Trash2 size={16} />
+                    {deleteConfirmationId === selectedTransaction.id
+                      ? page('deleteConfirmation')
+                      : page('delete')}
+                  </Button>
+                )}
               </div>
+
+              {isChoosingRecurringUpdate && (
+                <div className="space-y-2 rounded-3xl border border-zinc-800 bg-black p-3">
+                  <p className="text-sm text-zinc-500">
+                    {page('recurringUpdateQuestion')}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      className="px-3 text-sm"
+                      onClick={() =>
+                        handleUpdateCurrentMonth(selectedTransaction.id)
+                      }
+                    >
+                      <Pencil size={16} />
+                      {page('updateOnlyThisMonth')}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      className="px-3 text-sm"
+                      onClick={() =>
+                        handleUpdateCurrentAndNext(selectedTransaction)
+                      }
+                    >
+                      <Pencil size={16} />
+                      {page('updateThisAndNext')}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {isChoosingRecurringDelete && (
+                <div className="space-y-2 rounded-3xl border border-zinc-800 bg-black p-3">
+                  <p className="text-sm text-zinc-500">
+                    {page('recurringDeleteQuestion')}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="px-3 text-sm"
+                      onClick={() =>
+                        handleDeleteCurrentMonth(selectedTransaction.id)
+                      }
+                    >
+                      <Trash2 size={16} />
+                      {deleteConfirmationId === selectedTransaction.id
+                        ? page('deleteConfirmation')
+                        : page('deleteOnlyThisMonth')}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="px-3 text-sm"
+                      onClick={() =>
+                        handleDeleteCurrentAndNext(selectedTransaction)
+                      }
+                    >
+                      <Trash2 size={16} />
+                      {deleteConfirmationId === selectedTransaction.id
+                        ? page('deleteConfirmation')
+                        : page('deleteThisAndNext')}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -27,7 +27,7 @@ export function ReportsInsightList() {
 
       <ReportInsightRow
         label={t('availableAfterExpenses')}
-        value={formatCurrency(summary.balance, locale)}
+        value={formatCurrency(summary.confirmedBalance, locale)}
       />
 
       <ReportInsightRow

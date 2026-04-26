@@ -11,6 +11,7 @@ import {
 export function RecentTransactions() {
   const locale = useLocale();
   const home = useTranslations('home');
+  const add = useTranslations('add');
   const { transactions } = useTransactions();
   const recentTransactions = transactions.slice(0, 3);
 
@@ -31,9 +32,9 @@ export function RecentTransactions() {
               key={transaction.id}
               title={transaction.description}
               subtitle={`${transaction.category} • ${formatTransactionDate(
-                transaction.date,
+                transaction.dueDate,
                 locale
-              )}`}
+              )} • ${add(transaction.status)}`}
               amount={formatTransactionAmount(
                 transaction.amount,
                 transaction.type,

@@ -1,8 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { TransactionsList } from '@/features/transactions/components/TransactionsList';
-import { TransactionsMonthSummary } from '@/features/transactions/components/TransactionsMonthSummary';
+import { TransactionsMonthView } from '@/features/transactions/components/TransactionsMonthView';
 import { TransactionsSearchBar } from '@/features/transactions/components/TransactionsSearchBar';
 
 export default async function TransactionsPage({
@@ -29,9 +28,7 @@ function TransactionsContent() {
 
       <TransactionsSearchBar />
 
-      <TransactionsMonthSummary />
-
-      <TransactionsList />
+      <TransactionsMonthView />
     </div>
   );
 }

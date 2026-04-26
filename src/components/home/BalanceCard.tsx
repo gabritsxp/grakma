@@ -8,6 +8,7 @@ import { SectionCard } from '@/components/ui/SectionCard';
 import { useTransactions } from '@/lib/db/useTransactions';
 import {
   formatCurrency,
+  getCurrentMonthTransactions,
   summarizeTransactions,
 } from '@/lib/transactions/summary';
 
@@ -15,7 +16,7 @@ export function BalanceCard() {
   const locale = useLocale();
   const t = useTranslations('home');
   const { transactions } = useTransactions();
-  const summary = summarizeTransactions(transactions);
+  const summary = summarizeTransactions(getCurrentMonthTransactions(transactions));
 
   return (
     <SectionCard className="shadow-2xl shadow-black/30">
@@ -24,7 +25,7 @@ export function BalanceCard() {
           <p className="text-sm text-zinc-500">{t('availableBalance')}</p>
 
           <h2 className="mt-1 text-3xl font-semibold tracking-tight">
-            {formatCurrency(summary.balance, locale)}
+            {formatCurrency(summary.confirmedBalance, locale)}
           </h2>
         </div>
 
