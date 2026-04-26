@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+
 
 type MonthSelectorProps = {
   value: Date;
@@ -22,6 +23,8 @@ function isSameMonth(first: Date, second: Date) {
 
 export function MonthSelector({ value, onChange }: MonthSelectorProps) {
   const locale = useLocale();
+  const t = useTranslations('transactionsPage');
+  const common = useTranslations('common');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [visibleYear, setVisibleYear] = useState(value.getFullYear());
@@ -87,6 +90,7 @@ export function MonthSelector({ value, onChange }: MonthSelectorProps) {
             <div className="mb-5 flex items-center justify-between gap-3">
               <button
                 type="button"
+                aria-label={t('previousMonth')}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-black text-zinc-400 transition hover:bg-zinc-900 hover:text-white sm:h-10 sm:w-10"
                 onClick={() => setVisibleYear((year) => year - 1)}
               >
@@ -94,12 +98,13 @@ export function MonthSelector({ value, onChange }: MonthSelectorProps) {
               </button>
 
               <div className="text-center">
-                <p className="text-xs text-zinc-500">Selecionar mês</p>
+                <p className="text-xs text-zinc-500">{t('selectMonth')}</p>
                 <strong className="text-lg text-zinc-100">{visibleYear}</strong>
               </div>
 
               <button
                 type="button"
+                aria-label={t('nextMonth')}
                 className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-black text-zinc-400 transition hover:bg-zinc-900 hover:text-white sm:h-10 sm:w-10"
                 onClick={() => setVisibleYear((year) => year + 1)}
               >
@@ -133,11 +138,12 @@ export function MonthSelector({ value, onChange }: MonthSelectorProps) {
 
             <button
               type="button"
+              aria-label={common('close')}
               className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-black text-sm font-semibold text-zinc-300 transition hover:bg-zinc-900 hover:text-white sm:hidden"
               onClick={() => setIsOpen(false)}
             >
               <X size={16} />
-              Fechar
+              {common('close')}
             </button>
           </div>
         </>

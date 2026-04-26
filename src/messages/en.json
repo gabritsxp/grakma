@@ -164,7 +164,8 @@
     },
     "common": {
         "hideBalance": "Hide balance",
-        "showBalance": "Show balance"
+        "showBalance": "Show balance",
+        "close": "Close"
     },
     "language": {
         "label": "Language",

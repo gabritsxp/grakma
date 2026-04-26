@@ -164,7 +164,8 @@
     },
     "common": {
         "hideBalance": "Ocultar saldo",
-        "showBalance": "Mostrar saldo"
+        "showBalance": "Mostrar saldo",
+        "close": "Fechar"
     },
     "language": {
         "label": "Idioma",
