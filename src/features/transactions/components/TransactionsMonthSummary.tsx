@@ -1,8 +1,6 @@
 'use client';
 
-import { CalendarDays } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { IconButton } from '@/components/ui/IconButton';
 import { SectionCard } from '@/components/ui/SectionCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { useTransactions } from '@/lib/db/useTransactions';
@@ -15,6 +13,7 @@ import {
   summarizeAccounts,
   summarizeTransactions,
 } from '@/lib/transactions/summary';
+import { MonthSelector } from '@/components/ui/MonthSelector';
 
 type TransactionsMonthSummaryProps = {
   monthDate: Date;
@@ -48,21 +47,7 @@ export function TransactionsMonthSummary({
           </h2>
         </div>
 
-        <div className="flex gap-2">
-          <IconButton
-            icon={CalendarDays}
-            label={t('previousMonth')}
-            className="h-12 w-12 rounded-2xl"
-            onClick={() => onMonthChange(addCalendarMonths(monthDate, -1))}
-          />
-
-          <IconButton
-            icon={CalendarDays}
-            label={t('nextMonth')}
-            className="h-12 w-12 rounded-2xl"
-            onClick={() => onMonthChange(addCalendarMonths(monthDate, 1))}
-          />
-        </div>
+        <MonthSelector value={monthDate} onChange={onMonthChange} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
