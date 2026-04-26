@@ -30,6 +30,11 @@ type EditState = {
   status: 'pending' | 'confirmed';
 };
 
+type DeleteConfirmation = | {
+  transactionId:string
+  scope: 'single' | 'currentMonth' | 'currentAndNext'
+} | null;
+
 function createEditState(transaction: Transaction): EditState {
   return {
     type: transaction.type,
@@ -57,9 +62,7 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [editState, setEditState] = useState<EditState | null>(null);
-  const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(
-    null
-  );
+  const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmation>(null)
   const [isChoosingRecurringDelete, setIsChoosingRecurringDelete] =
     useState(false);
   const [isChoosingRecurringUpdate, setIsChoosingRecurringUpdate] =
@@ -68,7 +71,7 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
   function openTransaction(transaction: Transaction) {
     setSelectedTransaction(transaction);
     setEditState(createEditState(transaction));
-    setDeleteConfirmationId(null);
+    setDeleteConfirmation(null);
     setIsChoosingRecurringDelete(false);
     setIsChoosingRecurringUpdate(false);
   }
@@ -76,7 +79,7 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
   function closeTransaction() {
     setSelectedTransaction(null);
     setEditState(null);
-    setDeleteConfirmationId(null);
+    setDeleteConfirmation(null);
     setIsChoosingRecurringDelete(false);
     setIsChoosingRecurringUpdate(false);
   }
@@ -161,53 +164,71 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
     await reloadTransactions();
   }
 
-  async function handleDelete(id: string) {
-    if (selectedTransaction?.recurrenceId && !isChoosingRecurringDelete) {
-      setIsChoosingRecurringDelete(true);
-      return;
-    }
-
-    if (deleteConfirmationId !== id) {
-      setDeleteConfirmationId(id);
-      return;
-    }
-
-    await deleteTransaction(id);
-
-    closeTransaction();
-    await reloadTransactions();
+async function handleDelete(id: string) {
+  if (selectedTransaction?.recurrenceId && !isChoosingRecurringDelete) {
+    setIsChoosingRecurringDelete(true);
+    return;
   }
 
-  async function handleDeleteCurrentMonth(id: string) {
-    if (deleteConfirmationId !== id) {
-      setDeleteConfirmationId(id);
-      return;
-    }
-
-    await deleteTransaction(id);
-
-    closeTransaction();
-    await reloadTransactions();
+  if (
+    deleteConfirmation?.transactionId !== id ||
+    deleteConfirmation.scope !== 'single'
+  ) {
+    setDeleteConfirmation({
+      transactionId: id,
+      scope: 'single',
+    });
+    return;
   }
 
-  async function handleDeleteCurrentAndNext(transaction: Transaction) {
-    if (deleteConfirmationId !== transaction.id) {
-      setDeleteConfirmationId(transaction.id);
-      return;
-    }
+  await deleteTransaction(id);
 
-    if (!transaction.recurrenceId) {
-      return;
-    }
+  closeTransaction();
+  await reloadTransactions();
+}
 
-    await deleteRecurringTransactionsFrom(
-      transaction.recurrenceId,
-      transaction.dueDate
-    );
-
-    closeTransaction();
-    await reloadTransactions();
+async function handleDeleteCurrentMonth(id: string) {
+  if (
+    deleteConfirmation?.transactionId !== id ||
+    deleteConfirmation.scope !== 'currentMonth'
+  ) {
+    setDeleteConfirmation({
+      transactionId: id,
+      scope: 'currentMonth',
+    });
+    return;
   }
+
+  await deleteTransaction(id);
+
+  closeTransaction();
+  await reloadTransactions();
+}
+
+async function handleDeleteCurrentAndNext(transaction: Transaction) {
+  if (
+    deleteConfirmation?.transactionId !== transaction.id ||
+    deleteConfirmation.scope !== 'currentAndNext'
+  ) {
+    setDeleteConfirmation({
+      transactionId: transaction.id,
+      scope: 'currentAndNext',
+    });
+    return;
+  }
+
+  if (!transaction.recurrenceId) {
+    return;
+  }
+
+  await deleteRecurringTransactionsFrom(
+    transaction.recurrenceId,
+    transaction.dueDate
+  );
+
+  closeTransaction();
+  await reloadTransactions();
+}
 
   return (
     <section className="space-y-3">
@@ -389,7 +410,8 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
                     onClick={() => handleDelete(selectedTransaction.id)}
                   >
                     <Trash2 size={16} />
-                    {deleteConfirmationId === selectedTransaction.id
+                    {deleteConfirmation?.transactionId === selectedTransaction.id &&
+                    deleteConfirmation.scope === 'single'
                       ? page('deleteConfirmation')
                       : page('delete')}
                   </Button>
@@ -444,7 +466,8 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
                       }
                     >
                       <Trash2 size={16} />
-                      {deleteConfirmationId === selectedTransaction.id
+                      {deleteConfirmation?.transactionId === selectedTransaction.id &&
+                      deleteConfirmation.scope === 'currentMonth'
                         ? page('deleteConfirmation')
                         : page('deleteOnlyThisMonth')}
                     </Button>
@@ -458,7 +481,8 @@ export function TransactionsList({ monthDate }: TransactionsListProps) {
                       }
                     >
                       <Trash2 size={16} />
-                      {deleteConfirmationId === selectedTransaction.id
+                      {deleteConfirmation?.transactionId === selectedTransaction.id &&
+                      deleteConfirmation.scope === 'currentAndNext'
                         ? page('deleteConfirmation')
                         : page('deleteThisAndNext')}
                     </Button>
